@@ -7,7 +7,7 @@
   * new functions:
   * cut, scut
 */
-;(function (scope) {
+(function (scope) {
   //limits for faster solving
   var limits = {
     decimalDigits : 200,
@@ -38,38 +38,6 @@
     return n.join(".");
   }
 
-  //synthetic cut
-  function scut(n, a, b){
-    var x;
-    n = n.split(".");
-    x = n[0].length - a;
-    x = (x < 0) ? 0 : x;
-    n[0] = n[0].substr(x, a);
-    if(n[1]){
-      n[1] = n[1].substr(0, b);
-    }else{
-      n[1] = "0";
-    }
-
-    return n.join(".");
-  }
-
-  //produce string
-  //do not remove
-  function produce(str, i) {
-    if (str === "") {
-      return "";
-    } else if (i <= 0) {
-      return "";
-    }
-    var j;
-    var output = "";
-    for (j = 0; j < i; j++) {
-      output += str;
-    }
-    return output;
-  }
-
   //function signFix
   function signFix(n){
     var sign = "";
@@ -85,7 +53,7 @@
         break;
       }
     }
-    return sign + n.replace(/\-/g,"");
+    return sign + n.replace(/-/g,"");
   }
 
   //floor function
@@ -94,11 +62,6 @@
       return n;
     }
     return n.split(".")[0];
-  }
-
-  //chunk string into n-size array
-  function chunkString(n, size) {
-    return n.match(new RegExp(".{1," + size + "}", "g"));
   }
 
   //removes decimals
@@ -192,29 +155,6 @@
     return [a.join("."), b.join(".")];
   }
 
-    //forrmats two numbers and returns an array 
-  function pairInt(a, b, skip) {
-    a = a.split(".");
-    b = b.split(".");
-
-    a[1] = (a.length - 1) === 1 ? a[1] : "0";
-    b[1] = (b.length - 1) === 1 ? b[1] : "0";
-
-    if (!skip) {
-      var ala = a[0].length;
-      var alb = b[0].length;
-
-      while (ala > alb) {
-        b[0] = "0" + b[0];
-        alb += 1;
-      }
-      while (ala < alb) {
-        a[0] = "0" + a[0];
-        ala += 1;
-      }
-    }
-    return [a.join("."), b.join(".")];
-  }
   //minimum negative
   function minNeg(_a, _b) {
     var al, bl, i;
@@ -689,7 +629,7 @@
   }
 
   //sd subtracts the decimal part of string
-  function sd(x, y, n, m) {
+  function sd(x, y) {
     var xl, yl, i;
     xl = x.length;
     yl = y.length;
@@ -838,134 +778,6 @@
       b = add(add(a, a), "-" + multiply(multiply(n, a), a));
     }
     return removeTrailingZeroes(b);
-  }
-
-  //simple division long / short
-  function d(_a, _b) {
-    //turn to integer if necessary
-    _a = abs(_a);
-    _b = abs(_b) * 1;
-    var i, remainder = "",
-      quotient = "",
-      tmp;
-    var al;
-    //_a and _b are both integers
-    //turn a into chunks of size 6
-    _a = chunkString(_a, 6);
-    //it is now easy to divide _a
-    //divide a into b
-    al = _a.length;
-    for (i = 0; i < al; i++) {
-      //divide ang get only integer
-      tmp = Math.floor((remainder + _a[i]) * 1 / _b);
-      //console.log(tmp);
-      //push the digit into quotient string
-      quotient += tmp;
-      //console.log(quotient);
-      //get the remainder
-      remainder = ((remainder + _a[i]) * 1 - (tmp * _b) * 1) + "";
-      //console.log(_a[i], (tmp * _b));
-    }
-    return quotient;
-  }
-
-  //dr divide long w/ short + remainder
-  function dr(_a, _b) {
-    //turn to integer if necessary
-    _a = abs(_a);
-    _b = abs(_b) * 1;
-    var i, remainder = "",
-      quotient = "",
-      tmp;
-    var al;
-    //_a and _b are both integers
-    //turn a into chunks of size 6
-    _a = chunkString(_a, 6);
-    //it is now easy to divide _a
-    //divide a into b
-    al = _a.length;
-    for (i = 0; i < al; i++) {
-      //divide ang get only integer
-      tmp = Math.floor((remainder + _a[i]) * 1 / _b);
-      //console.log(tmp);
-      //push the digit into quotient string
-      quotient += tmp;
-      //console.log(quotient);
-      //get the remainder
-      remainder = ((remainder + _a[i]) * 1 - (tmp * _b) * 1) + "";
-      //console.log(_a[i], (tmp * _b));
-    }
-    return [quotient, remainder];
-  }
-
-  //function quickDivisor
-  function quickDivisor(A, B) {
-    var num, quotient;
-    var sign = "-";
-    if (getSign(A) === getSign(B)) {
-      sign = "";
-    }
-    A = abs(A);
-    B = abs(B);
-    var al = A.length;
-    var bl = B.length;
-    var quick = B[0];
-    //if a is smaller than b
-    //then the qoutient would
-    //always be zero
-    if (al < bl) {
-      quotient = "0";
-      return quotient;
-    }
-    num = A.substr(0, (al - bl + 1));
-    quotient = d(num, quick);
-    return sign + quotient;
-  }
-  //division for pure integers
-  function div(N, D, flag) {
-    N = removeLeadingZeroes(N);
-    if (D === "0") {
-      if (flag) {
-        throw "Division: Cannot divide by zero ";
-      }
-      return "Unexpected Division: Cannot divide by zero ";
-    } else if (D.length < 9) {
-      return dr(N, D);
-    }
-    var M, Q, R, Qn, A, tries = 0;
-    //well be using a good algorithm
-    //get the magnitude where M = length(D) - 1;
-    M = D.length - 1;
-    //get the quick divisor A
-    A = D[0] + zero(M);
-    //quotient simply
-    Q = quickDivisor(N, A);
-    //ready R
-    R = a(D, "1");
-    var iter = 0;
-    while (isMax(abs(R), D) && iter < 2000) {
-      //get the remainder
-      //by N - (Q * D)
-      console.log("n: " + N);
-      console.log("qxd : " + mm(Q, D));
-      R = floor(removeLeadingZeroes(add(N, "-" + mm(Q, D))));
-      console.log("R: " + R);
-      //Q + R / A
-      Qn = floor(add(Q, quickDivisor(R, A)));
-      console.log("Qn: " + Qn);
-      //(Q + Qn)/2
-      Q = floor(d(a(Q, Qn), "2"));
-      console.log("Q: " + Q);
-      iter++;
-    }
-    //calculate final value of R = N - Q*D
-    R = floor(removeLeadingZeroes(add(N, "-" + mm(Q, D))));
-    //check if R is negative
-    if (isMin(R, "0", true)) {
-      Q = removeLeadingZeroes(s(Q, "1"));
-      R = floor(add(R, D));
-    }
-    return [Q, R, Qn];
   }
 
   //division using reciprocal
