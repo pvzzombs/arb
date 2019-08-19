@@ -716,21 +716,6 @@
     return output.split("").reverse().join("");
   }
 
-  //multiplying pure integers
-  function mm(_a, _b) {
-    //no suasy heck format
-    //direct operation!
-    _b = _b.split("").reverse().join("");
-    var i, output = "0",
-      tmp;
-    var bl = _b.length;
-    for (i = 0; i < bl; i++) {
-      tmp = m(_a, _b[i]);
-      output = a(output, tmp + zero(i));
-    }
-    return output;
-  }
-
   //multiplication operator
   function multiply(_a, _b) {
     var t = fixMult(_a, _b);
