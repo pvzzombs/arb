@@ -1,22 +1,65 @@
-(function (scope) {
-  /*
-  //splice function for string
-  if (!String.prototype.splice) {
-    String.prototype.splice = function (start, delCount, newSubStr) {
-      return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
-    };
-  }*/
+/*
+  arb.js
+  0.0.9
+  whats new:
+  * implemented division using newton-raphson method
+  * division contains decimal errors at the end
+  * new functions:
+  * cut, scut
+*/
+;(function (scope) {
+  //limits for faster solving
+  var limits = {
+    decimalDigits : 200,
+    integerDigits : 200,
+    //if 0.99999 99999 99999
+    //or 1.00000 00000 00000
+    roundDecimals : 15
+  };
 
   //splice function for string
   function splice(str, start, delCount, newSubStr) {
     return str.slice(0, start) + newSubStr + str.slice(start + Math.abs(delCount));
   }
 
+  //function cut
+  function cut(n){
+    var x;
+    n = n.split(".");
+    x = n[0].length - limits.integerDigits;
+    x = (x < 0) ? 0 : x;
+    n[0] = n[0].substr(x, limits.integerDigits);
+    if(n[1]){
+      n[1] = n[1].substr(0, limits.decimalDigits);
+    }else{
+      n[1] = "0";
+    }
+
+    return n.join(".");
+  }
+
+  //synthetic cut
+  function scut(n, a, b){
+    var x;
+    n = n.split(".");
+    x = n[0].length - a;
+    x = (x < 0) ? 0 : x;
+    n[0] = n[0].substr(x, a);
+    if(n[1]){
+      n[1] = n[1].substr(0, b);
+    }else{
+      n[1] = "0";
+    }
+
+    return n.join(".");
+  }
+
   //produce string
+  //do not remove
   function produce(str, i) {
     if (str === "") {
       return "";
-    }else if(i <= 0){
+    } else if (i <= 0) {
       return "";
     }
     var j;
@@ -27,10 +70,42 @@
     return output;
   }
 
+  //function signFix
+  function signFix(n){
+    var sign = "";
+    var l = n.length;
+    for(i = 0; i < l; i++){
+      if(n[i] === "-"){
+        if(sign === ""){
+          sign = "-";
+        }else{
+          sign = "";
+        }
+      }else{
+        break;
+      }
+    }
+    return sign + n.replace(/\-/g,"");
+  }
+
+  //floor function
+  function floor(n) {
+    if (n.indexOf(".") === -1) {
+      return n;
+    }
+    return n.split(".")[0];
+  }
+
+  //chunk string into n-size array
+  function chunkString(n, size) {
+    return n.match(new RegExp(".{1," + size + "}", "g"));
+  }
+
   //removes decimals
   function removeDecimal(str) {
     return str.replace(/\./g, "");
   }
+
   //returns the sign of the number<string>
   function getSign(a) {
     if (a[0] !== "-") {
@@ -55,6 +130,7 @@
     }
     return str;
   }
+
   //forrmats two numbers and returns an array 
   function pair(a, b, skip) {
     a = a.split(".");
@@ -91,6 +167,54 @@
     return [a.join("."), b.join(".")];
   }
 
+  //pair only decimal
+  //forrmats two numbers and returns an array 
+  function pairDecimal(a, b, skip) {
+    a = a.split(".");
+    b = b.split(".");
+
+    a[1] = (a.length - 1) === 1 ? a[1] : "0";
+    b[1] = (b.length - 1) === 1 ? b[1] : "0";
+
+    if (!skip) {
+      var bla = a[1].length;
+      var blb = b[1].length;
+
+      while (bla > blb) {
+        b[1] += "0";
+        blb += 1;
+      }
+      while (bla < blb) {
+        a[1] += "0";
+        bla += 1;
+      }
+    }
+    return [a.join("."), b.join(".")];
+  }
+
+    //forrmats two numbers and returns an array 
+  function pairInt(a, b, skip) {
+    a = a.split(".");
+    b = b.split(".");
+
+    a[1] = (a.length - 1) === 1 ? a[1] : "0";
+    b[1] = (b.length - 1) === 1 ? b[1] : "0";
+
+    if (!skip) {
+      var ala = a[0].length;
+      var alb = b[0].length;
+
+      while (ala > alb) {
+        b[0] = "0" + b[0];
+        alb += 1;
+      }
+      while (ala < alb) {
+        a[0] = "0" + a[0];
+        ala += 1;
+      }
+    }
+    return [a.join("."), b.join(".")];
+  }
   //minimum negative
   function minNeg(_a, _b) {
     var al, bl, i;
@@ -259,29 +383,14 @@
     return str.reverse().join("");
   }
 
-  //fill zero infornt
-  function fillZeroFront(str, i) {
-    while (i !== 0) {
-      str = "0" + str;
-      i--;
-    }
-    return str;
-  }
-
   //produce zero <string>
   function zero(i) {
+    if (i <= 0) {
+      return "";
+    }
     var str = "";
     while (i !== 0) {
       str += "0";
-      i--;
-    }
-    return str;
-  }
-
-  //fill zero at the ack
-  function fillZeroBack(str, i) {
-    while (i !== 0) {
-      str = str + "0";
       i--;
     }
     return str;
@@ -369,16 +478,22 @@
     //if zero no decimal movement is needed, add ".0" to the back
     var decimalCount = 0;
     var zero = 0;
-    if (a[1] === "0" && a[1].length === 1) {
-      zero += 1;
-    } else {
-      decimalCount += a[1].length;
+    if(a[1] !== undefined){
+      if (a[1] === "0" && a[1].length === 1) {
+        zero += 1;
+      } else {
+        decimalCount += a[1].length;
+      }
     }
-    if (b[1] === "0" && b[1].length === 1) {
-      zero += 1;
-    } else {
-      decimalCount += b[1].length;
+    
+    if(b[1] !== undefined){
+      if (b[1] === "0" && b[1].length === 1) {
+        zero += 1;
+      } else {
+        decimalCount += b[1].length;
+      }
     }
+    
     return decimalCount;
   }
 
@@ -389,11 +504,8 @@
     var newIndex = -1;
     var temp = pair(_a, _b);
     //_b is the divisor!
-    //Count the decimal movement
-    //by counting the decimal
-    //places of the divisor.
-    _a = temp[0];
-    _b = temp[1];
+    _a = removeTrailingZeroes(removeLeadingZeroes(temp[0]));
+    _b = removeTrailingZeroes(removeLeadingZeroes(temp[1]));
     decimal = decimalCounter(_b, "0.0");
 
     //remove decimal of b
@@ -408,27 +520,76 @@
     //put into place
     _a = splice(_a, newIndex, 0, ".");
     //finish
-    if(_a[_a.length-1] === "."){
+    if (_a[_a.length - 1] === ".") {
       _a += "0";
     }
+    _b += ".0";
     return [_a, _b];
+
+  }
+
+  //fix Clean for addition
+  function fixAdd(a, b){
+    var t;
+
+    a = signFix(a);
+    b = signFix(b);
+
+    signa = getSign(a);
+    signb = getSign(b);
+
+    a = abs(a);
+    b = abs(b);
+
+    t = pairDecimal(a, b);
+    a = t[0];
+    b = t[1];
+
+    a = removeLeadingZeroes(a);
+    b = removeLeadingZeroes(b);
+
+    return [a, b, signa, signb];
+  }
+
+  //check fix for mult
+  function fixMult(a, b){
+    var d, signa, signb;
+
+    a = signFix(a);
+    b = signFix(b);
+
+    signa = getSign(a);
+    signb = getSign(b);
+
+    a = abs(a);
+    b = abs(b);
+
+    a = (a.indexOf(".") > -1) ? removeTrailingZeroes(a) : a;
+    b = (b.indexOf(".") > -1) ? removeTrailingZeroes(b) : b;
+
+    d = decimalCounter(a, b);
+
+    a = (a.slice(-2) === ".0") ? a.slice(0, a.length - 2) : a;
+    b = (b.slice(-2) === ".0") ? b.slice(0, b.length - 2) : b;
+
+    a = removeLeadingZeroes(a);
+    b = removeLeadingZeroes(b);
+
+    return [a, b, signa, signb, d];
 
   }
 
   //a adds the integer part of a string
   function a(_a, _b) {
     var al, bl, i;
-    //_a and _b are only decimals
-    //check if a.lentgth > b.lentgth
+    //_a and _b are strings
+    //made of pure integers
     al = _a.length;
     bl = _b.length;
-    while (al > bl) {
-      _b = "0" + _b;
-      bl += 1;
-    }
-    while (al < bl) {
-      _a = "0" + _a;
-      al += 1;
+    if (al > bl) {
+      _b = zero(al - bl) + _b;
+    } else if (al < bl) {
+      _a = zero(bl - al) + _a;
     }
     _a = _a.split("").reverse();
     _b = _b.split("").reverse();
@@ -456,17 +617,14 @@
   //ad adds the decimal part of string
   function ad(_a, _b) {
     var al, bl, i;
-    //_a and _b are only decimals
-    //check if a.lentgth > b.lentgth
+    //_a and _b are are strings
+    //made of pure integers
     al = _a.length;
     bl = _b.length;
-    while (al > bl) {
-      _b += "0";
-      bl += 1;
-    }
-    while (al < bl) {
-      _a += "0";
-      al += 1;
+    if (al > bl) {
+      _b += zero(al - bl);
+    } else if (al < bl) {
+      _a += zero(bl - al);
     }
     _a = _a.split("").reverse();
     _b = _b.split("").reverse();
@@ -490,12 +648,8 @@
 
   //add is a operator
   function ADD(_a, _b) {
-    var temp = pair(_a, _b);
-    _a = temp[0];
-    _b = temp[1];
     var aa = _a.split(".");
     var bb = _b.split(".");
-
     //now add integer part only
     var integerPart = a(aa[0], bb[0]);
     //then add decimal part only
@@ -509,20 +663,17 @@
     var xl, yl, i;
     xl = x.length;
     yl = y.length;
-    while (xl < yl) {
-      x = "0" + x;
-      xl += 1;
-    }
-    while (xl > yl) {
-      y = "0" + y;
-      yl += 1;
+    if (xl < yl) {
+      x = zero(yl - xl) + x;
+    } else if (xl > yl) {
+      y = zero(xl - yl) + y;
     }
     x = x.split("").reverse();
     y = y.split("").reverse();
 
-    var borrow = 0;
-    var diff = [];
-    var temp = 0;
+    var borrow = 0,
+      diff = [],
+      temp = 0;
     xl = x.length;
     for (i = 0; i < xl; i++) {
       temp = (x[i] * 1) - (y[i] * 1) - borrow;
@@ -538,24 +689,22 @@
   }
 
   //sd subtracts the decimal part of string
-  function sd(x, y) {
+  function sd(x, y, n, m) {
     var xl, yl, i;
     xl = x.length;
     yl = y.length;
-    while (xl < yl) {
-      x = "0" + x;
-      xl += 1;
+    if (xl < yl) {
+      x += zero(yl - xl);
+    } else if (xl > yl) {
+      y += zero(xl - yl);
     }
-    while (xl > yl) {
-      y = "0" + y;
-      yl += 1;
-    }
+
     x = x.split("").reverse();
     y = y.split("").reverse();
 
-    var borrow = 0;
-    var diff = [];
-    var temp = 0;
+    var borrow = 0,
+      diff = [],
+      temp = 0;
     xl = x.length;
     for (i = 0; i < xl; i++) {
       temp = (x[i] * 1) - (y[i] * 1) - borrow;
@@ -572,40 +721,41 @@
 
   //subtract is a operator
   function subtract(_a, _b) {
-    var temp = pair(_a, _b);
-    _a = temp[0];
-    _b = temp[1];
     var aa = _a.split(".");
     var bb = _b.split(".");
     //now subtract integer part only
     var integerPart = s(aa[0], bb[0]);
     //then subtract decimal part only
-    var decimalPart = sd(aa[1], bb[1]);
+    var decimalPart = sd(aa[1], bb[1], aa[0], bb[0]);
     //then join the results
     return removeLeadingZeroes(s(integerPart, decimalPart[1])) + "." + removeTrailingZeroes(decimalPart[0]);
   }
 
   //decider
   function add(_a, _b) {
-    var signa = getSign(_a);
-    var signb = getSign(_b);
-    var aa = abs(_a);
-    var bb = abs(_b);
+    var t = fixAdd(_a, _b);
+    var signa = t[2];
+    var signb = t[3];
+    var aa = t[0];
+    var bb = t[1];
     var first = max(aa, bb);
     var second = min(aa, bb);
-    var output = "";
+    var output = "0.0";
     if (getSign(_a) === getSign(_b)) {
-      output = signa + ADD(aa, bb);
+      return cut(signa + ADD(aa, bb));
     } else {
       if (aa === first && bb === first) {
         //different sign same numbers? Its zero!
         return "0.0";
       } else if (aa === first) {
-        output = signa + subtract(first, second);
+        return cut(signa + subtract(first, second));
       } else if (bb === first) {
-        output = signb + subtract(first, second);
+        return cut(signb + subtract(first, second));
       }
     }
+
+    //if there's a failure automatic log activate
+    console.log("Looks like there's something wrong at " + aa + ", " + bb + ", where original is " + _a + ", " + _b);
     return output;
   }
 
@@ -627,47 +777,37 @@
   }
 
   //multiplying pure integers
-  function mm(_a, _b){
+  function mm(_a, _b) {
     //no suasy heck format
     //direct operation!
     _b = _b.split("").reverse().join("");
-    var i, output = "0", tmp;
+    var i, output = "0",
+      tmp;
     var bl = _b.length;
-    for(i = 0; i < bl; i++){
+    for (i = 0; i < bl; i++) {
       tmp = m(_a, _b[i]);
       output = a(output, tmp + zero(i));
     }
     return output;
   }
+
   //multiplication operator
   function multiply(_a, _b) {
-    //store orginal
-    var oa = _a;
-    var ob = _b;
-
+    var t = fixMult(_a, _b);
     var sign = "-";
-    var decimal = 0;
-    var temp = pair(_a, _b, true);
-    _a = removeTrailingZeroes(temp[0]);
-    _b = removeTrailingZeroes(temp[1]);
-    if (getSign(_a) === getSign(_b)) {
+    var decimal = t[4];
+    if (t[2] === t[3]) {
       sign = "";
     }
-    _a = abs(_a);
-    _b = abs(_b);
-    decimal = decimalCounter(_a, _b);
-    _a = turnToIntIfDecIsZero(_a);
-    _b = turnToIntIfDecIsZero(_b).split("").reverse().join("");
-    var aa = removeDecimal(_a);
-    var bb = removeDecimal(_b);
-    
-    if(aa === "0" || bb === "0"){
+    var aa = removeDecimal(t[0]);
+    var bb = removeDecimal(t[1].split("").reverse().join(""));
+
+    if (aa === "0" || bb === "0") {
       return "0.0";
-    }else if(aa === "1"){
-      //reverse bb
-      return sign + removeLeadingZeroes(removeTrailingZeroes(abs(ob)));
-    }else if(bb === "1"){
-      return sign + removeLeadingZeroes(removeTrailingZeroes(abs(oa)));
+    } else if (aa === "1") {
+      return sign + t[1];
+    } else if (bb === "1") {
+      return sign + t[0];
     }
 
     var i, output = "0",
@@ -681,103 +821,205 @@
     }
     //console.log(decimal);
     if (decimal === 0) {
-      return sign + removeLeadingZeroes(output + ".0");
+      return cut(sign + removeLeadingZeroes(output + ".0"));
     } else {
       var d = (output.length) - decimal;
-      return sign + removeLeadingZeroes(splice(output, d, 0, "."));
+      return cut(sign + removeLeadingZeroes(splice(output, d, 0, ".")));
     }
   }
 
-  //divide
-  function divide(_a, _b, fn) {
-    var sign = "-",
-      app;
-    //var decimal = 0;
-    var temp = pair(_a, _b, true);
-    _a = removeTrailingZeroes(temp[0]);
-    _b = removeTrailingZeroes(temp[1]);
-    if (getSign(_a) === getSign(_b)) {
+  //used to calculate the reciprocal of a int
+  function reciprocal(n){
+    n = floor(n);
+    var a, b, i;
+    b = "0." + zero(n.length) + "1";
+    for(i = 0; i < 25; i++){
+      a = b;
+      b = add(add(a, a), "-" + multiply(multiply(n, a), a));
+    }
+    return removeTrailingZeroes(b);
+  }
+
+  //simple division long / short
+  function d(_a, _b) {
+    //turn to integer if necessary
+    _a = abs(_a);
+    _b = abs(_b) * 1;
+    var i, remainder = "",
+      quotient = "",
+      tmp;
+    var al;
+    //_a and _b are both integers
+    //turn a into chunks of size 6
+    _a = chunkString(_a, 6);
+    //it is now easy to divide _a
+    //divide a into b
+    al = _a.length;
+    for (i = 0; i < al; i++) {
+      //divide ang get only integer
+      tmp = Math.floor((remainder + _a[i]) * 1 / _b);
+      //console.log(tmp);
+      //push the digit into quotient string
+      quotient += tmp;
+      //console.log(quotient);
+      //get the remainder
+      remainder = ((remainder + _a[i]) * 1 - (tmp * _b) * 1) + "";
+      //console.log(_a[i], (tmp * _b));
+    }
+    return quotient;
+  }
+
+  //dr divide long w/ short + remainder
+  function dr(_a, _b) {
+    //turn to integer if necessary
+    _a = abs(_a);
+    _b = abs(_b) * 1;
+    var i, remainder = "",
+      quotient = "",
+      tmp;
+    var al;
+    //_a and _b are both integers
+    //turn a into chunks of size 6
+    _a = chunkString(_a, 6);
+    //it is now easy to divide _a
+    //divide a into b
+    al = _a.length;
+    for (i = 0; i < al; i++) {
+      //divide ang get only integer
+      tmp = Math.floor((remainder + _a[i]) * 1 / _b);
+      //console.log(tmp);
+      //push the digit into quotient string
+      quotient += tmp;
+      //console.log(quotient);
+      //get the remainder
+      remainder = ((remainder + _a[i]) * 1 - (tmp * _b) * 1) + "";
+      //console.log(_a[i], (tmp * _b));
+    }
+    return [quotient, remainder];
+  }
+
+  //function quickDivisor
+  function quickDivisor(A, B) {
+    var num, quotient;
+    var sign = "-";
+    if (getSign(A) === getSign(B)) {
       sign = "";
     }
-    _a = abs(_a);
-    _b = abs(_b);
-    temp = moveDecimal(_a, _b);
-    temp = pair(temp[0], temp[1]);
-    _a = removeLeadingZeroes(removeTrailingZeroes(temp[0]));
-    _b = removeLeadingZeroes(removeTrailingZeroes(temp[1]));
-    var output = "0";
-    var mult = "1";
-    var od = "", mtr;
-    od = _b;
-    while(true) {
-      mtr = produce("9", (_a.length - 3) - (_b.length - 2));
-      if(mtr === ""){
-        _b = od;
-        mult = "1";
-      }else{
-        _b = mm(removeDecimal(removeLeadingZeroes(removeTrailingZeroes(_b))), mtr);
-        mult = mtr;
-      }
-      if (isMax(_a, _b)) {
-        _a = subtract(_a, _b);
-        console.log(_a, _b);
-        output = a(output, mult);
-        
-      }
-      if (isMin(_a, _b, true) || _a.split(".") == "0") {
-        clearInterval(app);
-        if (fn) {
-          fn(output);
-        }
-        return output;
-        //console.error("Hoy gising!!!");
-      }
+    A = abs(A);
+    B = abs(B);
+    var al = A.length;
+    var bl = B.length;
+    var quick = B[0];
+    //if a is smaller than b
+    //then the qoutient would
+    //always be zero
+    if (al < bl) {
+      quotient = "0";
+      return quotient;
     }
+    num = A.substr(0, (al - bl + 1));
+    quotient = d(num, quick);
+    return sign + quotient;
+  }
+  //division for pure integers
+  function div(N, D, flag) {
+    N = removeLeadingZeroes(N);
+    if (D === "0") {
+      if (flag) {
+        throw "Division: Cannot divide by zero ";
+      }
+      return "Unexpected Division: Cannot divide by zero ";
+    } else if (D.length < 9) {
+      return dr(N, D);
+    }
+    var M, Q, R, Qn, A, tries = 0;
+    //well be using a good algorithm
+    //get the magnitude where M = length(D) - 1;
+    M = D.length - 1;
+    //get the quick divisor A
+    A = D[0] + zero(M);
+    //quotient simply
+    Q = quickDivisor(N, A);
+    //ready R
+    R = a(D, "1");
+    var iter = 0;
+    while (isMax(abs(R), D) && iter < 2000) {
+      //get the remainder
+      //by N - (Q * D)
+      console.log("n: " + N);
+      console.log("qxd : " + mm(Q, D));
+      R = floor(removeLeadingZeroes(add(N, "-" + mm(Q, D))));
+      console.log("R: " + R);
+      //Q + R / A
+      Qn = floor(add(Q, quickDivisor(R, A)));
+      console.log("Qn: " + Qn);
+      //(Q + Qn)/2
+      Q = floor(d(a(Q, Qn), "2"));
+      console.log("Q: " + Q);
+      iter++;
+    }
+    //calculate final value of R = N - Q*D
+    R = floor(removeLeadingZeroes(add(N, "-" + mm(Q, D))));
+    //check if R is negative
+    if (isMin(R, "0", true)) {
+      Q = removeLeadingZeroes(s(Q, "1"));
+      R = floor(add(R, D));
+    }
+    return [Q, R, Qn];
+  }
+
+  //division using reciprocal
+  function divideR(x, y){
+    if(y === "0" || y === "0.0" || y === "-0.0" || y === "-0"){
+      throw "error: division by zero! ";
+    }
+    var nu = reciprocal(y);
+    var output = multiply(x,nu);
+    //remove the last five digits of decimal
+    return removeTrailingZeroes(cut(output));
   }
 
   //create our function constructor for arb
   //arb stands for arbitrary
-  function arbShell(n){
+  function arbShell(n) {
     //n is string here
-    //Serialize n
+    //serialize n
     this.value = n.replace(/(\t|\s|[a-zA-Z])/g, "");
   }
   arbShell.prototype = {
-    add : function(n){
+    add: function (n) {
       var temp = this.value;
       this.value = add(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
     },
-    sub : function(n){
+    sub: function (n) {
       var temp = this.value;
       this.value = add(temp, "-" + n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
     },
-    mul : function(n){
+    mul: function (n) {
       var temp = this.value;
       this.value = multiply(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
     },
-    div : function(n){
-      //this is a fallback function
-      //division is not yet implemented well
+    div: function (n) {
       var temp = this.value;
-      this.value = String((temp * 1) / (n * 1));
+      this.value = divideR(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
     }
   };
 
-  //export our function
+  //export our object
   if (typeof define === 'function' && define.amd) {
-    define([], function(n){
+    define([], function (n) {
       return (new arbShell(n));
     });
   } else if (typeof exports === 'object') {
-    module.exports = function(n){
+    module.exports = function (n) {
       return (new arbShell(n));
     };
   } else {
-    scope.arb = function(n){
+    scope.arb = function (n) {
       return (new arbShell(n));
     };
   }
