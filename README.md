@@ -1,6 +1,6 @@
 # arb
 A arbitrary multi-precision library for operating large numbers represented as strings  
-
+[![CodeFactor](https://www.codefactor.io/repository/github/pvzzombs/arb/badge/master)](https://www.codefactor.io/repository/github/pvzzombs/arb/overview/master)  
 ### How to use  
 1. Get a copy in the ``dist`` directory.
 2. Place it in your file as a script.
