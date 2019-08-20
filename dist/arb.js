@@ -1,19 +1,14 @@
 /*
   arb.js
-  0.0.9
+  0.1.0
   whats new:
-  * implemented division using newton-raphson method
-  * division contains decimal errors at the end
-  * new functions:
-  * cut, scut
+  * division implementation is still fixed
 */
 (function (scope) {
   //limits for faster solving
   var limits = {
     decimalDigits : 200,
     integerDigits : 200,
-    //if 0.99999 99999 99999
-    //or 1.00000 00000 00000
     roundDecimals : 15
   };
 
@@ -83,51 +78,6 @@
       return num.substr(1, num.length);
     }
     return num;
-  }
-
-  //integer if decimal is zero
-  function turnToIntIfDecIsZero(str) {
-    var a = str.split(".");
-    if (a[1] === "0" && a[1].length === 1) {
-      return a[0];
-    }
-    return str;
-  }
-
-  //forrmats two numbers and returns an array 
-  function pair(a, b, skip) {
-    a = a.split(".");
-    b = b.split(".");
-
-    a[1] = (a.length - 1) === 1 ? a[1] : "0";
-    b[1] = (b.length - 1) === 1 ? b[1] : "0";
-
-    if (!skip) {
-      var ala = a[0].length;
-      var alb = b[0].length;
-      var bla = a[1].length;
-      var blb = b[1].length;
-
-      while (ala > alb) {
-        b[0] = "0" + b[0];
-        alb += 1;
-      }
-      while (ala < alb) {
-        a[0] = "0" + a[0];
-        ala += 1;
-      }
-
-      while (bla > blb) {
-        b[1] += "0";
-        blb += 1;
-      }
-      while (bla < blb) {
-        a[1] += "0";
-        bla += 1;
-      }
-    }
-
-    return [a.join("."), b.join(".")];
   }
 
   //pair only decimal
@@ -417,10 +367,9 @@
     var b = _b.split(".");
     //if zero no decimal movement is needed, add ".0" to the back
     var decimalCount = 0;
-    var zero = 0;
     if(a[1] !== undefined){
       if (a[1] === "0" && a[1].length === 1) {
-        zero += 1;
+
       } else {
         decimalCount += a[1].length;
       }
@@ -428,44 +377,13 @@
     
     if(b[1] !== undefined){
       if (b[1] === "0" && b[1].length === 1) {
-        zero += 1;
+
       } else {
         decimalCount += b[1].length;
       }
     }
     
     return decimalCount;
-  }
-
-  //move decimal for division
-  function moveDecimal(_a, _b) {
-    var decimal = 0;
-    var oldIndex = -1;
-    var newIndex = -1;
-    var temp = pair(_a, _b);
-    //_b is the divisor!
-    _a = removeTrailingZeroes(removeLeadingZeroes(temp[0]));
-    _b = removeTrailingZeroes(removeLeadingZeroes(temp[1]));
-    decimal = decimalCounter(_b, "0.0");
-
-    //remove decimal of b
-    _b = removeDecimal(turnToIntIfDecIsZero(_b));
-    //get the current position
-    //of the decimal
-    oldIndex = _a.indexOf(".");
-    //remove the decimal
-    _a = removeDecimal(_a);
-    //calculate the new pos
-    newIndex = oldIndex + decimal;
-    //put into place
-    _a = splice(_a, newIndex, 0, ".");
-    //finish
-    if (_a[_a.length - 1] === ".") {
-      _a += "0";
-    }
-    _b += ".0";
-    return [_a, _b];
-
   }
 
   //fix Clean for addition
@@ -758,7 +676,7 @@
     n = floor(n);
     var a, b, i;
     b = "0." + zero(n.length) + "1";
-    for(i = 0; i < 25; i++){
+    for(i = 0; i < 20; i++){
       a = b;
       b = add(add(a, a), "-" + multiply(multiply(n, a), a));
     }
