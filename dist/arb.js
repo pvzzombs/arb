@@ -1,8 +1,8 @@
 /*
   arb.js
-  0.1.2
+  0.1.3
   whats new:
-  * division implementation fixed for bug errors
+  * removed some block of codes
 */
 (function (scope) {
   //limits for faster solving
@@ -37,6 +37,7 @@
   function signFix(n){
     var sign = "";
     var l = n.length;
+    var i;
     for(i = 0; i < l; i++){
       if(n[i] === "-"){
         if(sign === ""){
@@ -369,7 +370,7 @@
     var decimalCount = 0;
     if(a[1] !== undefined){
       if (a[1] === "0" && a[1].length === 1) {
-
+        decimalCount += 0;
       } else {
         decimalCount += a[1].length;
       }
@@ -377,7 +378,7 @@
     
     if(b[1] !== undefined){
       if (b[1] === "0" && b[1].length === 1) {
-
+        decimalCount += 0;
       } else {
         decimalCount += b[1].length;
       }
@@ -393,8 +394,8 @@
     a = signFix(a);
     b = signFix(b);
 
-    signa = getSign(a);
-    signb = getSign(b);
+    var signa = getSign(a);
+    var signb = getSign(b);
 
     a = abs(a);
     b = abs(b);
@@ -671,42 +672,6 @@
     }
   }
 
-  //used to calculate the reciprocal of a int
-  function reciprocal(n){
-    n = floor(n);
-    var a, b, i;
-    var q, w, x, y;
-    b = "0." + zero(n.length) + "1";
-    for(i = 0; i < 20; i++){
-      a = b;
-      q = add(a, a);
-      w = multiply(n, a);
-      x = multiply(w, a);
-      y = "-" + x;
-      b = add(q, y);
-    }
-    return removeTrailingZeroes(b).substr(0, 195);
-  }
-
-  //division using reciprocal
-  function divideR(x, y){
-    if(y === "0" || y === "0.0" || y === "-0.0" || y === "-0"){
-      throw "error: division by zero! ";
-    }
-    var signx = getSign(x);
-    var signy = getSign(y);
-    var sign = "-";
-    x = abs(x);
-    y = abs(y);
-    if(signx === signy){
-      sign = "";
-    }
-    var nu = reciprocal(y);
-    var output = multiply(x,nu);
-    //remove the last five digits of decimal
-    return sign + removeTrailingZeroes(cut(output));
-  }
-
   //integer if decimal is zero
   function turnToIntIfDecIsZero(str) {
     var a = str.split(".");
@@ -783,27 +748,6 @@
     _b += ".0";
     return [_a, _b];
 
-  }
-
-  //function moveDecimalFix
-  function moveDecimalFix(A, B){
-    var posA = -1;
-    var posB = -1;
-    var count = 0;
-    A = removeLeadingZeroes(A);
-    B = removeLeadingZeroes(B);
-    posA = A.indexOf(".");
-    posB = B.indexOf(".");
-    count = decimalCounter(B, "0");
-    A += zero(count);
-    B = removeDecimal(turnToIntIfDecIsZero(B));
-    A = removeDecimal(A);
-    A = splice(A, posA + count, 0, ".");
-    if (A[A.length - 1] === ".") {
-      A += "0";
-    }
-    B += ".0";
-    return [A, B];
   }
   
   //functio divFix
