@@ -1,8 +1,8 @@
 /*
   arb.js
-  0.1.0
+  0.1.2
   whats new:
-  * division implementation is still fixed
+  * division implementation fixed for bug errors
 */
 (function (scope) {
   //limits for faster solving
@@ -675,12 +675,17 @@
   function reciprocal(n){
     n = floor(n);
     var a, b, i;
+    var q, w, x, y;
     b = "0." + zero(n.length) + "1";
     for(i = 0; i < 20; i++){
       a = b;
-      b = add(add(a, a), "-" + multiply(multiply(n, a), a));
+      q = add(a, a);
+      w = multiply(n, a);
+      x = multiply(w, a);
+      y = "-" + x;
+      b = add(q, y);
     }
-    return removeTrailingZeroes(b);
+    return removeTrailingZeroes(b).substr(0, 195);
   }
 
   //division using reciprocal
@@ -688,12 +693,273 @@
     if(y === "0" || y === "0.0" || y === "-0.0" || y === "-0"){
       throw "error: division by zero! ";
     }
+    var signx = getSign(x);
+    var signy = getSign(y);
+    var sign = "-";
+    x = abs(x);
+    y = abs(y);
+    if(signx === signy){
+      sign = "";
+    }
     var nu = reciprocal(y);
     var output = multiply(x,nu);
     //remove the last five digits of decimal
-    return removeTrailingZeroes(cut(output));
+    return sign + removeTrailingZeroes(cut(output));
   }
 
+  //integer if decimal is zero
+  function turnToIntIfDecIsZero(str) {
+    var a = str.split(".");
+    if (a[1] === "0" && a[1].length === 1) {
+      return a[0];
+    }
+    return str;
+  }
+
+  //forrmats two numbers and returns an array 
+  function pair(a, b, skip) {
+    a = a.split(".");
+    b = b.split(".");
+
+    a[1] = (a.length - 1) === 1 ? a[1] : "0";
+    b[1] = (b.length - 1) === 1 ? b[1] : "0";
+
+    if (!skip) {
+      var ala = a[0].length;
+      var alb = b[0].length;
+      var bla = a[1].length;
+      var blb = b[1].length;
+
+      while (ala > alb) {
+        b[0] = "0" + b[0];
+        alb += 1;
+      }
+      while (ala < alb) {
+        a[0] = "0" + a[0];
+        ala += 1;
+      }
+
+      while (bla > blb) {
+        b[1] += "0";
+        blb += 1;
+      }
+      while (bla < blb) {
+        a[1] += "0";
+        bla += 1;
+      }
+    }
+
+    return [a.join("."), b.join(".")];
+  }
+
+  //move decimal for division
+  function moveDecimal(_a, _b) {
+    _a = removeTrailingZeroes(_a);
+    _b = removeTrailingZeroes(_b);
+    var decimal = 0;
+    var oldIndex = -1;
+    var newIndex = -1;
+    var temp = pair(_a, _b);
+    //_b is the divisor!
+    _a = removeLeadingZeroes(temp[0]);
+    _b = removeTrailingZeroes(removeLeadingZeroes(temp[1]));
+    decimal = decimalCounter(_b, "0");
+
+    //remove decimal of b
+    _b = removeDecimal(turnToIntIfDecIsZero(_b));
+    //get the current position
+    //of the decimal
+    oldIndex = _a.indexOf(".");
+    //remove the decimal
+    _a = removeDecimal(_a);
+    //calculate the new pos
+    newIndex = oldIndex + decimal;
+    //put into place
+    _a = splice(_a, newIndex, 0, ".");
+    //finish
+    if (_a[_a.length - 1] === ".") {
+      _a += "0";
+    }
+    _b += ".0";
+    return [_a, _b];
+
+  }
+
+  //function moveDecimalFix
+  function moveDecimalFix(A, B){
+    var posA = -1;
+    var posB = -1;
+    var count = 0;
+    A = removeLeadingZeroes(A);
+    B = removeLeadingZeroes(B);
+    posA = A.indexOf(".");
+    posB = B.indexOf(".");
+    count = decimalCounter(B, "0");
+    A += zero(count);
+    B = removeDecimal(turnToIntIfDecIsZero(B));
+    A = removeDecimal(A);
+    A = splice(A, posA + count, 0, ".");
+    if (A[A.length - 1] === ".") {
+      A += "0";
+    }
+    B += ".0";
+    return [A, B];
+  }
+  
+  //functio divFix
+  function divFix(_a, _b){
+    var d, signa, signb;
+
+    _a = signFix(_a);
+    _b = signFix(_b);
+
+    signa = getSign(_a);
+    signb = getSign(_b);
+
+    _a = abs(_a);
+    _b = abs(_b);
+
+    _a = (_a.indexOf(".") > -1) ? removeTrailingZeroes(_a) : _a + ".0";
+    _b = (_b.indexOf(".") > -1) ? removeTrailingZeroes(_b) : _b + ".0";
+
+    d = moveDecimal(_a, _b);
+
+    _a = d[0];
+    _b = d[1];
+
+    _b = (_b.slice(-2) === ".0") ? _b.slice(0, _b.length - 2) : _b;
+
+    _a = removeLeadingZeroes(_a);
+    _b = removeLeadingZeroes(_b);
+
+    return [_a, _b, signa, signb];
+  }
+
+  //division for integers
+  function division(A, B, t){
+    var OA = A;
+    if(A.length < B.length){
+      return ["0", A];
+    }else if(B === "0"){
+      throw "error!";
+    }
+
+    var i, q, d, z = A.length - B.length;
+    var stack = [];
+    var abl = A.length - B.length + 1;
+
+    for(i = 0; i < abl; i++){
+      d = B + zero(z);
+      //happens if there is a rmainder eg 956 / 34
+      if(A.length > d.length){
+        q = Math.floor(((A[0] + A[1]) * 1) / (d[0] * 1)) + "";
+      //happens if we find the real remainder R
+      }else if(A.length < d.length && i === (abl - 1)){
+        q = "0";
+        stack.push(q);
+        break;
+      //happens if the next digit zero ex: 024 / 100
+      }else if(A.length < d.length){
+        q = "0";
+        stack.push(q);
+        z = z - 1;
+        continue;
+      //happens if length of A === length of D
+      }else{
+        q = Math.floor((A[0] * 1) / (d[0] * 1)) + "";
+      }
+      if(q.length >= 2){
+        q = "9";
+      }
+      var temp = m(d, q);
+      while(isMin(A, temp, true)){
+        q = s(q,"1");
+        temp = m(d, q);
+      }
+      stack.push(q);
+      A = removeLeadingZeroes(s(A, m(d, q)));
+      z = z - 1;
+    }
+    if(t){
+      return [zero(OA.length - stack.length) + stack.join(""), A];
+    }
+    return [removeLeadingZeroes(stack.join("")), floor(removeLeadingZeroes(A + ".0"))];
+  }
+
+  //function count zeroes
+  function countZeroes(n){
+    var i, nl = n.length;
+    var output = 0;
+    for(i = 0; i < nl; i++){
+      if(n[i] === "0"){
+        output+=1;
+      }else{
+        break;
+      }
+    }
+    return output;
+  }
+
+  //function division
+  function Division(_a, _b){
+    var temp = divFix(_a, _b);
+    var A = temp[0];
+    var B = temp[1];
+    var signA = temp[2];
+    var signB = temp[3];
+    var output = "";
+    var sign = "-";
+    var tmp = "";
+    var t = "";
+    //var i = 0, h = 0;
+    var r = "";
+    var cz = 0;
+    var rl = 0;
+
+    if(signA === signB){
+      sign = "";
+    }
+
+    if (B === "0"){
+      throw "Division Error: Cannot Divide By Zero";
+    }else if(A === "0.0"){
+      return "0.0";
+    }
+
+    A = A.split(".");
+    tmp = division(A[0], B);
+    output += (tmp[0] + ".");
+    r = tmp[1];
+    rl = r.length;
+    if(r === "0"){
+      r = "";
+      rl = 0;
+      cz = countZeroes(A[1]);
+      if(A[1] === "0"){
+        cz = 0;
+      }
+      A[1] = removeLeadingZeroes(A[1]);
+    }
+    
+    t = r + A[1];
+    tmp = division(t + zero(limits.decimalDigits - t.length), B, true);
+    output += (zero(cz) + tmp[0].substr(rl, tmp[0].length));
+
+    return sign + removeTrailingZeroes(output);
+  }
+
+  //function power
+  function power(_a, _b){
+    _b = abs(floor(_b));
+    var i = "1";
+    var output = _a;
+    while(isMin(i, _b, true)){
+      i = a(i, "1");
+      output = multiply(output, _a);
+    }
+    return output;
+  }
+  
   //create our function constructor for arb
   //arb stands for arbitrary
   function arbShell(n) {
@@ -719,7 +985,12 @@
     },
     div: function (n) {
       var temp = this.value;
-      this.value = divideR(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+      this.value = Division(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+      return this;
+    },
+    pow: function (n) {
+      var temp = this.value;
+      this.value = power(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
     }
   };
