@@ -18,6 +18,7 @@ A arbitrary multi-precision library for operating large numbers represented as s
    arb("12").add("12"); //returns "24.0"
    arb("12").sub("2"); //returns "10.0"
    arb("12").mul("12"); //returns "144.0"
-   arb("12").div("12"); //returns "1"
+   arb("12").div("12"); //returns "1.0"
+   arb("12").pow("12"); //returns "8916100448256.0"
    ```
 LICENSE: MIT
