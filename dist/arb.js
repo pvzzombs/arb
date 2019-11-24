@@ -1,8 +1,10 @@
 /*
   arb.js
-  0.1.3
+  0.1.5
   whats new:
-  * removed some block of codes
+  * added eq, lt and gt
+  * comparison operators
+  * now you can compare numbers
 */
 (function (scope) {
   //limits for faster solving
@@ -15,22 +17,6 @@
   //splice function for string
   function splice(str, start, delCount, newSubStr) {
     return str.slice(0, start) + newSubStr + str.slice(start + Math.abs(delCount));
-  }
-
-  //function cut
-  function cut(n){
-    var x;
-    n = n.split(".");
-    x = n[0].length - limits.integerDigits;
-    x = (x < 0) ? 0 : x;
-    n[0] = n[0].substr(x, limits.integerDigits);
-    if(n[1]){
-      n[1] = n[1].substr(0, limits.decimalDigits);
-    }else{
-      n[1] = "0";
-    }
-
-    return n.join(".");
   }
 
   //function signFix
@@ -585,7 +571,7 @@
     //now subtract integer part only
     var integerPart = s(aa[0], bb[0]);
     //then subtract decimal part only
-    var decimalPart = sd(aa[1], bb[1], aa[0], bb[0]);
+    var decimalPart = sd(aa[1], bb[1]);
     //then join the results
     return removeLeadingZeroes(s(integerPart, decimalPart[1])) + "." + removeTrailingZeroes(decimalPart[0]);
   }
@@ -601,15 +587,15 @@
     var second = min(aa, bb);
     var output = "0.0";
     if (getSign(_a) === getSign(_b)) {
-      return cut(signa + ADD(aa, bb));
+      return signa + ADD(aa, bb);
     } else {
       if (aa === first && bb === first) {
         //different sign same numbers? Its zero!
         return "0.0";
       } else if (aa === first) {
-        return cut(signa + subtract(first, second));
+        return signa + subtract(first, second);
       } else if (bb === first) {
-        return cut(signb + subtract(first, second));
+        return signb + subtract(first, second);
       }
     }
 
@@ -665,10 +651,10 @@
     }
     //console.log(decimal);
     if (decimal === 0) {
-      return cut(sign + removeLeadingZeroes(output + ".0"));
+      return sign + removeLeadingZeroes(output + ".0");
     } else {
       var d = (output.length) - decimal;
-      return cut(sign + removeLeadingZeroes(splice(output, d, 0, ".")));
+      return sign + removeLeadingZeroes(splice(output, d, 0, "."));
     }
   }
 
@@ -894,16 +880,79 @@
 
   //function power
   function power(_a, _b){
+    //patched for stopping big power
     _b = abs(floor(_b));
     var i = "1";
     var output = _a;
     while(isMin(i, _b, true)){
+      //this should be slow, but checking for growing digits is secured
+      if(abs(floor(output)).length > limits.decimalDigits){
+        console.error("Error: Value of the exponent is larger than the predefined limit.");
+        console.error("Stopped at iteration " + i + " of " + _b + ". Errors may happen due to precision.");
+        output = output.substr(0, limits.decimalDigits) + zero(output.length - 1 - limits.decimalDigits);
+        return output;
+      }
       i = a(i, "1");
       output = multiply(output, _a);
     }
     return output;
   }
+
+  //compare numbers
+  function equalTo(_a, _b){
+    //this is automatic
+    if(_a === _b){
+      return true;
+    }else{
+      var arr = fixAdd(_a, _b);
+      if(arr[0] === arr[1] && arr[0] === "0.0"){
+        return true;
+      }
+      if(arr[0] === arr[1] && arr[2] === arr[3]){
+        return true;
+      }
+      return false;
+    }
+  }
+
+  function maxTo(_a, _b){
+    var arr = fixAdd(_a, _b);
+    if(arr[0] === arr[1] && arr[0] === "0.0"){
+      return false;
+    }
+    var bool = isMax(arr[2] + arr[0], arr[3] + arr[1], true);
+    return bool;
+  }
+
+  function minTo(_a, _b){
+    var arr = fixAdd(_a, _b);
+    if(arr[0] === arr[1] && arr[0] === "0.0"){
+      return false;
+    }
+    var bool = isMin(arr[2] + arr[0], arr[3] + arr[1], true);
+    return bool;
+  }
+
+  function atan(x) {
+    var result = x;
+    var xSquared = x.mul(x);
+    
+    var term = x;
+    var divisor = arb("1");
+    
+    while (!term.eq("0")) {
+      divisor = divisor.add("2");
+      term = term.mul(xSquared);
+      result = result.sub(term.div(divisor));
   
+      divisor = divisor.add("2");
+      term = term.mul(xSquared);
+      result = result.add(term.div(divisor));
+    }
+  
+    return result;
+  }
+
   //create our function constructor for arb
   //arb stands for arbitrary
   function arbShell(n) {
@@ -936,7 +985,19 @@
       var temp = this.value;
       this.value = power(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
-    }
+    },
+    eq: function (n) {
+      var temp = this.value;
+      return equalTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+    },
+    lt: function (n) {
+      var temp = this.value;
+      return minTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""), true);
+    },
+    gt: function (n) {
+      var temp = this.value;
+      return maxTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""), true);
+    },
   };
 
   //export our object
