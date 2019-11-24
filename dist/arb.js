@@ -933,26 +933,6 @@
     return bool;
   }
 
-  function atan(x) {
-    var result = x;
-    var xSquared = x.mul(x);
-    
-    var term = x;
-    var divisor = arb("1");
-    
-    while (!term.eq("0")) {
-      divisor = divisor.add("2");
-      term = term.mul(xSquared);
-      result = result.sub(term.div(divisor));
-  
-      divisor = divisor.add("2");
-      term = term.mul(xSquared);
-      result = result.add(term.div(divisor));
-    }
-  
-    return result;
-  }
-
   //create our function constructor for arb
   //arb stands for arbitrary
   function arbShell(n) {
