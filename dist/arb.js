@@ -1,17 +1,19 @@
 /*
   arb.js
-  0.1.5
+  0.1.6
   whats new:
-  * added eq, lt and gt
-  * comparison operators
-  * now you can compare numbers
+  * extended comparison operators
+  * added lte and gte (<= and >=)
+  * pow fixing under observation
+  * custom division digits limit
+  * fixed decimal numbers limit
 */
 (function (scope) {
   //limits for faster solving
   var limits = {
-    decimalDigits : 200,
-    integerDigits : 200,
-    roundDecimals : 15
+    decimalDigits: 200,
+    integerDigits: 200,
+    roundDecimals: 15
   };
 
   //splice function for string
@@ -20,22 +22,22 @@
   }
 
   //function signFix
-  function signFix(n){
+  function signFix(n) {
     var sign = "";
     var l = n.length;
     var i;
-    for(i = 0; i < l; i++){
-      if(n[i] === "-"){
-        if(sign === ""){
+    for (i = 0; i < l; i++) {
+      if (n[i] === "-") {
+        if (sign === "") {
           sign = "-";
-        }else{
+        } else {
           sign = "";
         }
-      }else{
+      } else {
         break;
       }
     }
-    return sign + n.replace(/-/g,"");
+    return sign + n.replace(/-/g, "");
   }
 
   //floor function
@@ -354,27 +356,27 @@
     var b = _b.split(".");
     //if zero no decimal movement is needed, add ".0" to the back
     var decimalCount = 0;
-    if(a[1] !== undefined){
+    if (a[1] !== undefined) {
       if (a[1] === "0" && a[1].length === 1) {
         decimalCount += 0;
       } else {
         decimalCount += a[1].length;
       }
     }
-    
-    if(b[1] !== undefined){
+
+    if (b[1] !== undefined) {
       if (b[1] === "0" && b[1].length === 1) {
         decimalCount += 0;
       } else {
         decimalCount += b[1].length;
       }
     }
-    
+
     return decimalCount;
   }
 
   //fix Clean for addition
-  function fixAdd(a, b){
+  function fixAdd(a, b) {
     var t;
 
     a = signFix(a);
@@ -397,7 +399,7 @@
   }
 
   //check fix for mult
-  function fixMult(a, b){
+  function fixMult(a, b) {
     var d, signa, signb;
 
     a = signFix(a);
@@ -735,9 +737,9 @@
     return [_a, _b];
 
   }
-  
+
   //functio divFix
-  function divFix(_a, _b){
+  function divFix(_a, _b) {
     var d, signa, signb;
 
     _a = signFix(_a);
@@ -766,11 +768,11 @@
   }
 
   //division for integers
-  function division(A, B, t){
+  function division(A, B, t) {
     var OA = A;
-    if(A.length < B.length){
+    if (A.length < B.length) {
       return ["0", A];
-    }else if(B === "0"){
+    } else if (B === "0") {
       throw "error!";
     }
 
@@ -778,52 +780,52 @@
     var stack = [];
     var abl = A.length - B.length + 1;
 
-    for(i = 0; i < abl; i++){
+    for (i = 0; i < abl; i++) {
       d = B + zero(z);
       //happens if there is a rmainder eg 956 / 34
-      if(A.length > d.length){
+      if (A.length > d.length) {
         q = Math.floor(((A[0] + A[1]) * 1) / (d[0] * 1)) + "";
-      //happens if we find the real remainder R
-      }else if(A.length < d.length && i === (abl - 1)){
+        //happens if we find the real remainder R
+      } else if (A.length < d.length && i === (abl - 1)) {
         q = "0";
         stack.push(q);
         break;
-      //happens if the next digit zero ex: 024 / 100
-      }else if(A.length < d.length){
+        //happens if the next digit zero ex: 024 / 100
+      } else if (A.length < d.length) {
         q = "0";
         stack.push(q);
         z = z - 1;
         continue;
-      //happens if length of A === length of D
-      }else{
+        //happens if length of A === length of D
+      } else {
         q = Math.floor((A[0] * 1) / (d[0] * 1)) + "";
       }
-      if(q.length >= 2){
+      if (q.length >= 2) {
         q = "9";
       }
       var temp = m(d, q);
-      while(isMin(A, temp, true)){
-        q = s(q,"1");
+      while (isMin(A, temp, true)) {
+        q = s(q, "1");
         temp = m(d, q);
       }
       stack.push(q);
       A = removeLeadingZeroes(s(A, m(d, q)));
       z = z - 1;
     }
-    if(t){
+    if (t) {
       return [zero(OA.length - stack.length) + stack.join(""), A];
     }
     return [removeLeadingZeroes(stack.join("")), floor(removeLeadingZeroes(A + ".0"))];
   }
 
   //function count zeroes
-  function countZeroes(n){
+  function countZeroes(n) {
     var i, nl = n.length;
     var output = 0;
-    for(i = 0; i < nl; i++){
-      if(n[i] === "0"){
-        output+=1;
-      }else{
+    for (i = 0; i < nl; i++) {
+      if (n[i] === "0") {
+        output += 1;
+      } else {
         break;
       }
     }
@@ -831,7 +833,7 @@
   }
 
   //function division
-  function Division(_a, _b){
+  function Division(_a, _b) {
     var temp = divFix(_a, _b);
     var A = temp[0];
     var B = temp[1];
@@ -846,13 +848,13 @@
     var cz = 0;
     var rl = 0;
 
-    if(signA === signB){
+    if (signA === signB) {
       sign = "";
     }
 
-    if (B === "0"){
+    if (B === "0") {
       throw "Division Error: Cannot Divide By Zero";
-    }else if(A === "0.0"){
+    } else if (A === "0.0") {
       return "0.0";
     }
 
@@ -861,32 +863,32 @@
     output += (tmp[0] + ".");
     r = tmp[1];
     rl = r.length;
-    if(r === "0"){
+    if (r === "0") {
       r = "";
       rl = 0;
       cz = countZeroes(A[1]);
-      if(A[1] === "0"){
+      if (A[1] === "0") {
         cz = 0;
       }
       A[1] = removeLeadingZeroes(A[1]);
     }
-    
+
     t = r + A[1];
-    tmp = division(t + zero(limits.decimalDigits - t.length), B, true);
+    tmp = division(t + zero(limits.decimalDigits - 1), B, true);
     output += (zero(cz) + tmp[0].substr(rl, tmp[0].length));
 
     return sign + removeTrailingZeroes(output);
   }
 
   //function power
-  function power(_a, _b){
+  function power(_a, _b) {
     //patched for stopping big power
     _b = abs(floor(_b));
     var i = "1";
     var output = _a;
-    while(isMin(i, _b, true)){
-      //this should be slow, but checking for growing digits is secured
-      if(abs(floor(output)).length > limits.decimalDigits){
+    while (isMin(i, _b, true)) {
+      //this should be slow, but checking for growing digits is adviced
+      if (abs(floor(output)).length > limits.decimalDigits) {
         console.error("Error: Value of the exponent is larger than the predefined limit.");
         console.error("Stopped at iteration " + i + " of " + _b + ". Errors may happen due to precision.");
         output = output.substr(0, limits.decimalDigits) + zero(output.length - 1 - limits.decimalDigits);
@@ -899,37 +901,55 @@
   }
 
   //compare numbers
-  function equalTo(_a, _b){
+  function equalTo(_a, _b) {
     //this is automatic
-    if(_a === _b){
+    if (_a === _b) {
       return true;
-    }else{
+    } else {
       var arr = fixAdd(_a, _b);
-      if(arr[0] === arr[1] && arr[0] === "0.0"){
+      if (arr[0] === arr[1] && arr[0] === "0.0") {
         return true;
       }
-      if(arr[0] === arr[1] && arr[2] === arr[3]){
+      if (arr[0] === arr[1] && arr[2] === arr[3]) {
         return true;
       }
       return false;
     }
   }
 
-  function maxTo(_a, _b){
+  function maxTo(_a, _b) {
     var arr = fixAdd(_a, _b);
-    if(arr[0] === arr[1] && arr[0] === "0.0"){
+    if (arr[0] === arr[1] && arr[0] === "0.0") {
       return false;
     }
     var bool = isMax(arr[2] + arr[0], arr[3] + arr[1], true);
     return bool;
   }
 
-  function minTo(_a, _b){
+  function minTo(_a, _b) {
     var arr = fixAdd(_a, _b);
-    if(arr[0] === arr[1] && arr[0] === "0.0"){
+    if (arr[0] === arr[1] && arr[0] === "0.0") {
       return false;
     }
     var bool = isMin(arr[2] + arr[0], arr[3] + arr[1], true);
+    return bool;
+  }
+
+  function maxEqTo(_a, _b) {
+    var arr = fixAdd(_a, _b);
+    if (arr[0] === arr[1] && arr[0] === "0.0") {
+      return false;
+    }
+    var bool = isMax(arr[2] + arr[0], arr[3] + arr[1]);
+    return bool;
+  }
+
+  function minEqTo(_a, _b) {
+    var arr = fixAdd(_a, _b);
+    if (arr[0] === arr[1] && arr[0] === "0.0") {
+      return false;
+    }
+    var bool = isMin(arr[2] + arr[0], arr[3] + arr[1]);
     return bool;
   }
 
@@ -956,9 +976,15 @@
       this.value = multiply(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       return this;
     },
-    div: function (n) {
+    div: function (n, o) {
+      if(typeof o === "number"){
+        if(o > 0){
+          limits.decimalDigits = o;
+        }
+      }
       var temp = this.value;
-      this.value = Division(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+      this.value = Division(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""), o);
+      limits.decimalDigits = 200;
       return this;
     },
     pow: function (n) {
@@ -972,12 +998,20 @@
     },
     lt: function (n) {
       var temp = this.value;
-      return minTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""), true);
+      return minTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
     },
     gt: function (n) {
       var temp = this.value;
-      return maxTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""), true);
+      return maxTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
     },
+    lte: function (n) {
+      var temp = this.value;
+      return minEqTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+    },
+    gte: function (n) {
+      var temp = this.value;
+      return maxEqTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+    }
   };
 
   //export our object
