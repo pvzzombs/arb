@@ -1,12 +1,11 @@
 /*
   arb.js
-  0.1.6
+  0.1.7
   whats new:
-  * extended comparison operators
-  * added lte and gte (<= and >=)
-  * pow fixing under observation
-  * custom division digits limit
-  * fixed decimal numbers limit
+  * adjusting power limitation
+  * raw addition, subtraction and
+  * division was added
+  * floor and abs method too
 */
 (function (scope) {
   //limits for faster solving
@@ -961,6 +960,21 @@
     this.value = n.replace(/(\t|\s|[a-zA-Z])/g, "");
   }
   arbShell.prototype = {
+    rawAdd: function (n) {
+      var temp = this.value;
+      this.value = ADD(temp, n);
+      return this;
+    },
+    rawSubtract: function (n) {
+      var temp = this.value;
+      this.value = subtract(temp, n);
+      return this;
+    },
+    rawDivide: function (n) {
+      var temp = floor(this.value);
+      this.value = division(temp, floor(n))[0];
+      return this;
+    },
     add: function (n) {
       var temp = this.value;
       this.value = add(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
@@ -983,13 +997,19 @@
         }
       }
       var temp = this.value;
-      this.value = Division(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""), o);
+      this.value = Division(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
       limits.decimalDigits = 200;
       return this;
     },
-    pow: function (n) {
+    pow: function (n,o) {
+      if(typeof o === "number"){
+        if(o > 0){
+          limits.decimalDigits = o;
+        }
+      }
       var temp = this.value;
       this.value = power(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+      limits.decimalDigits = 200;
       return this;
     },
     eq: function (n) {
@@ -1011,6 +1031,16 @@
     gte: function (n) {
       var temp = this.value;
       return maxEqTo(temp, n.replace(/(\t|\s|[a-zA-Z])/g, ""));
+    },
+    floor: function () {
+    	var temp = this.value;
+    	this.value = floor(temp);
+    	return this;
+    },
+    abs: function () {
+    	var temp = this.value;
+    	this.value = abs(temp);
+    	return this;
     }
   };
 
