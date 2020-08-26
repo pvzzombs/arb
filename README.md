@@ -1,8 +1,7 @@
 # arb
 A arbitrary multi-precision library for operating large numbers represented as strings  
   
-[![CodeFactor](https://www.codefactor.io/repository/github/pvzzombs/arb/badge/master)](https://www.codefactor.io/repository/github/pvzzombs/arb/overview/master)  
-[![DeepScan grade](https://deepscan.io/api/teams/5260/projects/7030/branches/64956/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5260&pid=7030&bid=64956)  
+[![CodeFactor](https://www.codefactor.io/repository/github/pvzzombs/arb/badge/master)](https://www.codefactor.io/repository/github/pvzzombs/arb/overview/master)[![DeepScan grade](https://deepscan.io/api/teams/5260/projects/7030/branches/64956/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5260&pid=7030&bid=64956)  
   
 ### Packages  
 * [Full](https://cdn.jsdelivr.net/gh/pvzzombs/arb/dist/arb.js) : https://cdn.jsdelivr.net/gh/pvzzombs/arb/dist/arb.js  
