@@ -1,11 +1,8 @@
 /*
   arb.js
-  0.1.7
+  0.1.8
   whats new:
-  * adjusting power limitation
-  * raw addition, subtraction and
-  * division was added
-  * floor and abs method too
+  * refactoring
 */
 (function (scope) {
   //limits for faster solving
@@ -589,19 +586,16 @@
     var output = "0.0";
     if (getSign(_a) === getSign(_b)) {
       return signa + ADD(aa, bb);
-    } else {
-      if (aa === first && bb === first) {
-        //different sign same numbers? Its zero!
-        return "0.0";
-      } else if (aa === first) {
-        return signa + subtract(first, second);
-      } else if (bb === first) {
-        return signb + subtract(first, second);
-      }
     }
-
-    //if there's a failure automatic log activate
-    console.log("Looks like there's something wrong at " + aa + ", " + bb + ", where original is " + _a + ", " + _b);
+    if (aa === first && bb === first) {
+      //different sign same numbers? Its zero!
+      return "0.0";
+    } else if (aa === first) {
+      return signa + subtract(first, second);
+    } else if (bb === first) {
+      return signb + subtract(first, second);
+    }
+    
     return output;
   }
 
@@ -653,10 +647,9 @@
     //console.log(decimal);
     if (decimal === 0) {
       return sign + removeLeadingZeroes(output + ".0");
-    } else {
-      var d = (output.length) - decimal;
-      return sign + removeLeadingZeroes(splice(output, d, 0, "."));
     }
+    var d = (output.length) - decimal;
+    return sign + removeLeadingZeroes(splice(output, d, 0, "."));
   }
 
   //integer if decimal is zero
@@ -709,8 +702,8 @@
     _a = removeTrailingZeroes(_a);
     _b = removeTrailingZeroes(_b);
     var decimal = 0;
-    var oldIndex = -1;
-    var newIndex = -1;
+    //var oldIndex = -1;
+    //var newIndex = -1;
     var temp = pair(_a, _b);
     //_b is the divisor!
     _a = removeLeadingZeroes(temp[0]);
@@ -721,13 +714,13 @@
     _b = removeDecimal(turnToIntIfDecIsZero(_b));
     //get the current position
     //of the decimal
-    oldIndex = _a.indexOf(".");
+    //oldIndex = _a.indexOf(".");
     //remove the decimal
-    _a = removeDecimal(_a);
+    //_a = removeDecimal(_a);
     //calculate the new pos
-    newIndex = oldIndex + decimal;
+    //newIndex = oldIndex + decimal;
     //put into place
-    _a = splice(_a, newIndex, 0, ".");
+    _a = splice(removeDecimal(_a), _a.indexOf(".") + decimal, 0, ".");
     //finish
     if (_a[_a.length - 1] === ".") {
       _a += "0";
@@ -904,16 +897,15 @@
     //this is automatic
     if (_a === _b) {
       return true;
-    } else {
-      var arr = fixAdd(_a, _b);
-      if (arr[0] === arr[1] && arr[0] === "0.0") {
-        return true;
-      }
-      if (arr[0] === arr[1] && arr[2] === arr[3]) {
-        return true;
-      }
-      return false;
     }
+    var arr = fixAdd(_a, _b);
+    if (arr[0] === arr[1] && arr[0] === "0.0") {
+      return true;
+    }
+    if (arr[0] === arr[1] && arr[2] === arr[3]) {
+      return true;
+    }
+    return false;
   }
 
   function maxTo(_a, _b) {
@@ -954,12 +946,12 @@
 
   //create our function constructor for arb
   //arb stands for arbitrary
-  function arbShell(n) {
+  function Arbshell(n) {
     //n is string here
     //serialize n
     this.value = n.replace(/(\t|\s|[a-zA-Z])/g, "");
   }
-  arbShell.prototype = {
+  Arbshell.prototype = {
     rawAdd: function (n) {
       var temp = this.value;
       this.value = ADD(temp, n);
@@ -1045,17 +1037,18 @@
   };
 
   //export our object
+  /** global: define */
   if (typeof define === 'function' && define.amd) {
     define([], function (n) {
-      return (new arbShell(n));
+      return (new Arbshell(n));
     });
   } else if (typeof exports === 'object') {
     module.exports = function (n) {
-      return (new arbShell(n));
+      return (new Arbshell(n));
     };
   } else {
     scope.arb = function (n) {
-      return (new arbShell(n));
+      return (new Arbshell(n));
     };
   }
 })(this);
