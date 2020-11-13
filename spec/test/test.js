@@ -41,4 +41,38 @@ describe("The arb.js test suite", function(){
       expect(arb("1").div("89").value.substr(0, 22)).toBe("0.01123595505617977528");
     });
   });
+  
+  describe("Equal tests", function(){
+    it("should work properly on equal", function(){
+      expect(arb("12345").eq("12345.0")).toBe(true);
+    });
+  });
+  
+  describe("Less than tests", function(){
+    it("should work properly", function(){
+      expect(arb("12345.0").lt("12346")).toBe(true);
+      expect(arb("-12345.0").lt("12345.0")).toBe(true);
+    });
+  });
+  
+  describe("Greater than tests", function(){
+    it("should work properly", function(){
+      expect(arb("123465365.0").gt("12346")).toBe(true);
+      expect(arb("-2345827389.0").gt("-1239999999945.0")).toBe(true);
+    });
+  });
+  
+  describe("Less than or equal tests", function(){
+    it("should work properly", function(){
+      expect(arb("12345.0").lte("12346")).toBe(true);
+      expect(arb("12345.0").lte("12345.0")).toBe(true);
+    });
+  });
+  
+  describe("Greater than or equal tests", function(){
+    it("should work properly", function(){
+      expect(arb("12346.0").gte("12346")).toBe(true);
+      expect(arb("9112345.0").gte("12345.0")).toBe(true);
+    });
+  });
 });
