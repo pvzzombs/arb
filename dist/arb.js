@@ -89,30 +89,57 @@
     }
     return [a.join("."), b.join(".")];
   }
+  
+  //chunk piece refactoring minNeg_Max_chunk
+  function minNeg_Max_chunk(_a, _b, _sign){
+    al = _a.length;
+    bl = _b.length;
+    if (al > bl) {
+      return _sign + _a;
+    }
+    if (al < bl) {
+      return _sign + _b;
+    }
+    if (al === bl) {
+      for (i = 0; i < al; i++) {
+        if (_a[i] * 1 < _b[i] * 1) {
+          return _sign + _b;
+        } else if (_a[i] * 1 > _b[i] * 1) {
+          return _sign + _a;
+        }
+      }
+    }
+    return _a;
+  }
+  
+  //chunk piece refactoring maxNeg_Min_Chunk
+  function maxNeg_Min_Chunk(_a, _b, _sign){
+    al = _a.length;
+    bl = _b.length;
+    if (al < bl) {
+      return _sign + _a;
+    }
+    if (al > bl) {
+      return _sign + _b;
+    }
+    if (al === bl) {
+      for (i = 0; i < al; i++) {
+        if (_a[i] * 1 > _b[i] * 1) {
+          return _sign + _b;
+        } else if (_a[i] * 1 < _b[i] * 1) {
+          return _sign + _a;
+        }
+      }
+    }
+    return _a;
+  }
 
   //minimum negative
   function minNeg(_a, _b) {
     var al, bl, i;
     _a = removeLeadingZeroes(_a);
     _b = removeLeadingZeroes(_b);
-    al = _a.length;
-    bl = _b.length;
-    if (al > bl) {
-      return "-" + _a;
-    }
-    if (al < bl) {
-      return "-" + _b;
-    }
-    if (al === bl) {
-      for (i = 0; i < al; i++) {
-        if (_a[i] * 1 < _b[i] * 1) {
-          return "-" + _b;
-        } else if (_a[i] * 1 > _b[i] * 1) {
-          return "-" + _a;
-        }
-      }
-    }
-    return _a;
+    return minNeg_Max_chunk(_a, _b, '-');
   }
 
   //minimum 
@@ -132,24 +159,7 @@
     if (signa === "-" && signb === "-") {
       return minNeg(abs(_a), abs(_b));
     }
-    al = _a.length;
-    bl = _b.length;
-    if (al < bl) {
-      return _a;
-    }
-    if (al > bl) {
-      return _b;
-    }
-    if (al === bl) {
-      for (i = 0; i < al; i++) {
-        if (_a[i] * 1 > _b[i] * 1) {
-          return _b;
-        } else if (_a[i] * 1 < _b[i] * 1) {
-          return _a;
-        }
-      }
-    }
-    return _a;
+    return maxNeg_Min_Chunk(_a, _b, '');
   }
 
   //maximum neg
@@ -157,24 +167,7 @@
     var al, bl, i;
     _a = removeLeadingZeroes(_a);
     _b = removeLeadingZeroes(_b);
-    al = _a.length;
-    bl = _b.length;
-    if (al < bl) {
-      return "-" + _a;
-    }
-    if (al > bl) {
-      return "-" + _b;
-    }
-    if (al === bl) {
-      for (i = 0; i < al; i++) {
-        if (_a[i] * 1 > _b[i] * 1) {
-          return "-" + _b;
-        } else if (_a[i] * 1 < _b[i] * 1) {
-          return "-" + _a;
-        }
-      }
-    }
-    return _a;
+    return maxNeg_Min_Chunk(_a, _b, '-');
   }
 
   //maximum
@@ -194,24 +187,7 @@
     if (signa === "-" && signb === "-") {
       return maxNeg(abs(_a), abs(_b));
     }
-    al = _a.length;
-    bl = _b.length;
-    if (al > bl) {
-      return _a;
-    }
-    if (al < bl) {
-      return _b;
-    }
-    if (al === bl) {
-      for (i = 0; i < al; i++) {
-        if (_a[i] * 1 < _b[i] * 1) {
-          return _b;
-        } else if (_a[i] * 1 > _b[i] * 1) {
-          return _a;
-        }
-      }
-    }
-    return _a;
+    return minNeg_Max_chunk(_a, _b, '');
   }
 
   //remove leading zeroes 
