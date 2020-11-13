@@ -92,8 +92,8 @@
   
   //chunk piece refactoring minNeg_Max_chunk
   function minNeg_Max_chunk(_a, _b, _sign){
-    al = _a.length;
-    bl = _b.length;
+    var al = _a.length;
+    var bl = _b.length;
     if (al > bl) {
       return _sign + _a;
     }
@@ -114,8 +114,8 @@
   
   //chunk piece refactoring maxNeg_Min_Chunk
   function maxNeg_Min_Chunk(_a, _b, _sign){
-    al = _a.length;
-    bl = _b.length;
+    var al = _a.length;
+    var bl = _b.length;
     if (al < bl) {
       return _sign + _a;
     }
