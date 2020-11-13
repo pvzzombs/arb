@@ -1,0 +1,30 @@
+{
+  "name": "arb",
+  "version": "0.1.8",
+  "description": "An arbitrary multi-precision library for operating large numbers represented as strings",
+  "main": "dist/arb.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pvzzombs/arb.git"
+  },
+  "keywords": [
+    "arbitratry",
+    "multiple",
+    "precision",
+    "big",
+    "integers",
+    "big",
+    "decimals",
+    "math",
+    "arithmetic"
+  ],
+  "author": "pvzzombs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pvzzombs/arb/issues"
+  },
+  "homepage": "https://github.com/pvzzombs/arb#readme"
+}
