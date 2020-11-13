@@ -101,7 +101,7 @@
       return _sign + _b;
     }
     if (al === bl) {
-      for (i = 0; i < al; i++) {
+      for (var i = 0; i < al; i++) {
         if (_a[i] * 1 < _b[i] * 1) {
           return _sign + _b;
         } else if (_a[i] * 1 > _b[i] * 1) {
@@ -123,7 +123,7 @@
       return _sign + _b;
     }
     if (al === bl) {
-      for (i = 0; i < al; i++) {
+      for (var i = 0; i < al; i++) {
         if (_a[i] * 1 > _b[i] * 1) {
           return _sign + _b;
         } else if (_a[i] * 1 < _b[i] * 1) {
@@ -136,7 +136,6 @@
 
   //minimum negative
   function minNeg(_a, _b) {
-    var al, bl, i;
     _a = removeLeadingZeroes(_a);
     _b = removeLeadingZeroes(_b);
     return minNeg_Max_chunk(_a, _b, '-');
@@ -145,7 +144,6 @@
   //minimum 
   function min(_a, _b) {
     var signa, signb;
-    var al, bl, i;
     _a = removeLeadingZeroes(_a);
     _b = removeLeadingZeroes(_b);
     signa = getSign(_a);
@@ -164,7 +162,6 @@
 
   //maximum neg
   function maxNeg(_a, _b) {
-    var al, bl, i;
     _a = removeLeadingZeroes(_a);
     _b = removeLeadingZeroes(_b);
     return maxNeg_Min_Chunk(_a, _b, '-');
@@ -173,7 +170,6 @@
   //maximum
   function max(_a, _b) {
     var signa, signb;
-    var al, bl, i;
     _a = removeLeadingZeroes(_a);
     _b = removeLeadingZeroes(_b);
     signa = getSign(_a);
