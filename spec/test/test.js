@@ -1,4 +1,3 @@
-var percent = 0;
 describe("The arb.js test suite", function(){
   var arb = require("../../dist/arb.js");
   
