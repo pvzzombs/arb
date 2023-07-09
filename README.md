@@ -18,6 +18,12 @@ npm install
 ```
 npm install --save-dev path/to/arb
 ```
+#### Example:  
+```
+const arb = require("arb");
+
+console.log(arb("1").add("1"));
+```
   
 ### Browser
 1. Clone or download the repository  
@@ -37,9 +43,16 @@ mkdir dist
 ```
 npm run build
 ```
-5. Grab and include `arb.min.js` in your project  
+5. Grab and include `arb.min.js` in your project 
+#### Example:  
+```
+<script src="arb.min.js"></script>
+<script>
+  console.log(arb("1").add("1"));
+</script>
+```
 
-### Examples : (Documentation will come soon)
+## Examples : (Documentation will come soon)
    ```javascript
    arb("12").add("12"); //returns "24.0"
    arb("12").sub("2"); //returns "10.0"
