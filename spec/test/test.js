@@ -1,5 +1,5 @@
 describe("The arb.js test suite", function(){
-  var arb = require("../../dist/arb.js");
+  var arb = require("../../src/index.js");
   
   var mulTestPair = ["1234567890", "9876543210"];
   var mulTestAnswer = "12193263111263526900.0";
