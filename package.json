@@ -4,7 +4,8 @@
   "description": "An arbitrary multi-precision library for operating large numbers represented as strings",
   "main": "src/index.js",
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine",
+    "build": "uglifyjs src/index.js -c -m -o dist/arb.min.js"
   },
   "repository": {
     "type": "git",
